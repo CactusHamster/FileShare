@@ -221,7 +221,7 @@ Server.ServerEvent.on('dir',(req,res,url,ip) => {//HAS ERROR CODE
 
   let perm = item.FilePermissions.find(elem => elem.InPath(p));
 
-  if (perm==undefined||perm.ReadDir) {
+  if (perm==undefined||!perm.ReadDir) {
     //error
     res.writeHead(401,{'Content-Type':'text/plain'});
     res.end(JSON.stringify({Message:'No file permissions!',Error:true,Code:'ACCESS_DENIED',Data:[]}));
@@ -306,7 +306,7 @@ Server.ServerEvent.on('deletefile',(req,res,url,ip) => {//HAS ERROR CODE
 
   let perm = item.FilePermissions.find(elem => elem.InPath(p));
 
-  if (perm==undefined||perm.Delete) {
+  if (perm==undefined||!perm.Delete) {
     //error
     res.writeHead(401,{'Content-Type':'text/plain'});
     res.end(JSON.stringify({Message:'No file permissions!',Error:true,Code:'ACCESS_DENIED',Data:[]}));
@@ -366,7 +366,7 @@ module.exports = Server;
 setInterval(function () {
   for (var i = 0; i < Server.Clients.length; i++) {
     let c = Server.Clients[i];
-    if ((c.LastPing+60*1000)<Date.now()) {consle.info(`[INFO] Client left!`);Server.Clients.splice(i,1);i--;}
+    if ((c.LastPing+60*1000)<Date.now()) {console.info(`[INFO] Client left!`);Server.Clients.splice(i,1);i--;}
   }
 
 },30*1000);

@@ -74,7 +74,7 @@ function switchTab(i) {
 function deltab() {
   //del current tab.
   tabs.splice(tab,1);
-  if (tab<tabs.length) {tab = tabs.length-1;}
+  if (tab+1>tabs.length) {tab = tabs.length-1;}
   getTab();
 }
 

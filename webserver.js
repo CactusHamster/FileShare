@@ -7,6 +7,7 @@ let clients = [];
 
 let api = require('./api.js');
 
+let ico = fs.readFileSync('./folder.ico');
 
 
 
@@ -58,6 +59,10 @@ http.createServer(function (req, res) {
 
 
 
+    return;
+  } else if (u.pathname=="/favicon.ico") {
+    res.writeHead(200,{'Content-Type':'text/plain'});
+    res.end(ico);
     return;
   }
 
