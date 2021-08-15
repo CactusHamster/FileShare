@@ -52,6 +52,8 @@ class Server {
     if (url.pathname.startsWith("/api/dir")) {this.ServerEvent.emit("dir",req,res,url,ip);return;}
 
     if (url.pathname.startsWith("/api/cwd")) {this.ServerEvent.emit("cwd",req,res,url,ip);return;}
+
+    if (url.pathname.startsWith("/api/readfile")) {this.ServerEvent.emit("readfile",req,res,url,ip);return;}
     this.ServerEvent.emit('error','Failed to access api.',400,req,res);
   }
 
@@ -133,6 +135,68 @@ Server.ServerEvent.on('ping', (req,res,url,ip) => {
   res.end(JSON.stringify({Message:'Ping complete.',Error:false}));
 });
 
+Server.ServerEvent.on('readfile',(req,res,url,ip) => {//READ FILE THINGY
+
+  let item = Server.Clients.find(elem => elem.Ip==ip);
+  if (item==undefined) {
+    //error
+    res.writeHead(400,{'Content-Type':'text/plain'});
+    res.end(JSON.stringify({Message:'Failed to read file, client not connected!',Data:[],Error:true,Code:'NOT_CONNECTED'}));
+    return;
+  }
+
+  let q = url.query ?? {Path:"./file"};
+
+  if (q.Path==undefined) {q.Path = "./file";}
+
+
+
+  let p = path.resolve(q.Path);
+
+
+  let perm = item.FilePermissions.find(elem => elem.InPath(p));
+
+  if (perm==undefined) {
+    //error
+    res.writeHead(401,{'Content-Type':'text/plain'});
+    res.end(JSON.stringify({Message:'No file permissions!',Error:true,Code:'ACCESS_DENIED',Data:[]}));
+    return;
+  }
+
+  if (!fs.existsSync(p)) {
+    res.writeHead(400,{'Content-Type':'text/plain'});
+    res.end(JSON.stringify({Message:'Error file doesn\'t exist',Data:[],Error:true,Code:'FILE_NOT_FOUND'}));
+    return;
+  }
+
+  let s = fs.statSync(p);
+
+  console.info(p);
+
+  if (!s.isFile()) {
+    res.writeHead(401,{'Content-Type':'text/plain'});
+    res.end(JSON.stringify({Message:'Error attempting to read folder as a file!',Data:[],Error:true,Code:'NOT_FILE'}));
+    return;
+  }
+
+
+    res.writeHead(200,{'Content-Type':'text/plain'});
+
+    var fReadStream = fs.createReadStream(p);//totally not taken from: https://stackoverflow.com/questions/20875314/download-large-file-from-node-http-server-the-server-out-of-memory
+    fReadStream.on('data', function (chunk) {
+    if(!res.write(chunk)){
+      fReadStream.pause();
+    }
+    });
+  fReadStream.on('end', function () {
+   res.end();
+  });
+  res.on("drain", function () {
+   fReadStream.resume();
+  });
+
+
+});
 
 Server.ServerEvent.on('dir',(req,res,url,ip) => {//HAS ERROR CODE
   let item = Server.Clients.find(elem => elem.Ip==ip);
@@ -147,7 +211,7 @@ Server.ServerEvent.on('dir',(req,res,url,ip) => {//HAS ERROR CODE
 
   if (q.Path==undefined) {q.Path = "./file";}
 
-  
+
 
   let p = path.resolve(q.Path);
 

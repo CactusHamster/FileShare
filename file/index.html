@@ -47,7 +47,7 @@ function refreshDir() {
       d2.Data.forEach((item, i) => {
 
         if (item.IsFolder) {out += `<div onclick="openFolder('${item.Name}')" class='file' ><img src="folder.png" class='file-image'></img><text class='file-text'>${item.Name}</text></div><br>`;} else {
-          out += `<div onclick="alert('You can\\'t open a file as a directory!');" class='file' ><img src="file.png" class='file-image'></img><text class='file-text'>${item.Name}</text></div><br>`;
+          out += `<div class='file' ><img src="file.png" class='file-image'></img><a class='file-text' href='/api/readfile?Path=${path+'/'+item.Name}' download='${item.Name}'>${item.Name}</a></div><br>`;
         }
 
 
