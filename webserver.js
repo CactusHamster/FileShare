@@ -5,6 +5,8 @@ let fs = require('fs');
 
 let clients = [];
 
+globalThis.fullPerm = process.argv.includes('-f');
+
 let api = require('./api.js');
 
 let ico = fs.readFileSync('./folder.ico');

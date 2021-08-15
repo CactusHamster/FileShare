@@ -77,7 +77,11 @@ Server.ServerEvent.on('connect', (req,res,url,name,ip)=> {
   }
 
   let cli = new Client(ip,name,currentId);
-  cli.FilePermissions = [new FilePermission(path.posix.resolve("./"),true,true,true)];
+  let path2 = './';
+  if (globalThis.fullPerm) {
+    path2 = '/';
+  }
+  cli.FilePermissions = [new FilePermission(path.posix.resolve(path2),true,true,true)];
   currentId++;
   Server.Clients = Server.Clients.concat(cli);
 
