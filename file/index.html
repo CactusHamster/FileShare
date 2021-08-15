@@ -49,7 +49,7 @@ function getTab() {
   path = tabs[tab].Path;
   refreshDir();
   let out = "";
-  tabs.forEach( function(item, i) {
+  tabs.forEach((item, i) => {
     if (i==tab) {
         out += `<div style='background-color:skyblue;' >${item.Path}</div>`;
         return;
