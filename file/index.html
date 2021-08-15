@@ -22,7 +22,7 @@
   <br><br>
   <button onclick="backPath();">&lt;- Back</button><input type='text' onkeydown="inputPath(event);" id='inputpath' value='${path}'></input><button onclick="resetPath();">CWD</button><br>
 <input type='text' placeholder='Name of file here!'></input><br>
-  <button onclick='delete();' disabled id="file_del">Delete</button>
+  <button onclick='"delete();"+1' disabled id="file_del">Delete</button>
 </div>
 
 
@@ -49,7 +49,7 @@ function getTab() {
   path = tabs[tab].Path;
   refreshDir();
   let out = "";
-  tabs.forEach((item, i) => {
+  tabs.forEach( function(item, i) {
     if (i==tab) {
         out += `<div style='background-color:skyblue;' >${item.Path}</div>`;
         return;
