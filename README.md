@@ -1,5 +1,5 @@
 # FileShare
- The best file sharing program ever, because it took forever to make. It also was slapped together really quickly.
+ A file sharing program that took a bit to make, and then I slapped together the html and css.
 # How to run
 Download the repo and find the file webserver.js, also make sure you have nodejs installed.  
 Now just type 'node index.js', also please realize this is not the most secure program in the world, don't expect me to make it more secure in the future.
