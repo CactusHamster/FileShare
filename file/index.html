@@ -11,6 +11,24 @@
 <br>
 
 
+<div class='file-tabs'>
+
+
+
+</div>
+
+<div class="file-menu">
+  <button onclick="newtab();">New Tab</button><button onclick="deltab();">Delete Tab</button>
+  <br><br>
+  <button onclick="backPath();">&lt;- Back</button><input type='text' onkeydown="inputPath(event);" id='inputpath' value='${path}'></input><button onclick="resetPath();">CWD</button><br>
+<input type='text' placeholder='Name of file here!'></input><br>
+  <button onclick='delete();' disabled id="file_del">Delete</button>
+</div>
+
+
+
+<br>
+
 
 <div class="file-explorer" height='200px'>
 
@@ -21,22 +39,65 @@
 
 
 <script>
+
+let tab = 0;
+
+let tabs = [];
+
+function getTab() {
+  //refresh dir and select current tab.
+  path = tabs[tab].Path;
+  refreshDir();
+  let out = "";
+  tabs.forEach((item, i) => {
+    if (i==tab) {
+        out += `<div style='background-color:skyblue;' >${item.Path}</div>`;
+        return;
+    }
+    out += `<div style='background-color:gray;' onclick='switchTab(${i});' >${item.Path}</div>`;
+  });
+
+  document.getElementsByClassName('file-tabs')[0].innerHTML = out;
+}
+
+function newtab() {
+  tabs = tabs.concat({Path:path});
+  getTab();
+}
+
+function switchTab(i) {
+
+  tabs[tab].Path = path;
+  tab = i;getTab();
+}
+
+function deltab() {
+  //del current tab.
+  tabs.splice(tab,1);
+  if (tab<tabs.length) {tab = tabs.length-1;}
+  getTab();
+}
+
 let connected = false;
 
 let path = "./file";
 
 function bconnect() {
+  tabs = [];
   getCwd((p) => {
     path = p;
     connect(null,namein.value);
     connected = true;
 
-    refreshDir();
+    newtab(path);
+    getTab();
+    //refreshDir();
 
   });
 }
 
 function refreshDir() {
+
   getDir((d) => {
     let d2 = JSON.parse(d);
     let out = "A client-side error occured while reading directory.";
@@ -46,8 +107,9 @@ function refreshDir() {
       out = "<br>";
       d2.Data.forEach((item, i) => {
 
-        if (item.IsFolder) {out += `<div onclick="openFolder('${item.Name}')" class='file' ><img src="folder.png" class='file-image'></img><text class='file-text'>${item.Name}</text></div><br>`;} else {
-          out += `<div class='file' ><img src="file.png" class='file-image'></img><a class='file-text' href='/api/readfile?Path=${path+'/'+item.Name}' download='${item.Name}'>${item.Name}</a></div><br>`;
+        if (item.IsFolder) {out += `<input type='checkbox' class="file-select" ></input><div onclick="openFolder('${item.Name}')" class='file' ><img src="folder.png" class='file-image'></img><text class='file-text'>${item.Name}</text></div><br><br>`;} else {
+          //out += `<div class='file' ><img src="file.png" class='file-image'></img><a class='file-text' href='/api/readfile?Path=${path+'/'+item.Name}' download='${item.Name}'>${item.Name}</a></div><br>`;
+          out += `<input type='checkbox' class="file-select" ></input><div class='file' onclick="download('/api/readfile?Path=${path+'/'+item.Name}','${item.Name}');"><img src="file.png" class='file-image'></img><text class='file-text'>${item.Name}</a></div><br><br>`;
         }
 
 
@@ -55,21 +117,46 @@ function refreshDir() {
 
     }
 
-    let prefix = `<button onclick="backPath();">&lt;- Back</button><input type='text' onkeydown="inputPath(event);" value='${path}'></input><button onclick="resetPath();">CWD</button>`;
+    //let prefix = `<button onclick="backPath();">&lt;- Back</button><input type='text' onkeydown="inputPath(event);" value='${path}'></input><button onclick="resetPath();">CWD</button>`;
 
 
-    document.getElementsByClassName('file-explorer')[0].innerHTML = prefix + out;
+    document.getElementsByClassName('file-explorer')[0].innerHTML = out;
+    //document.getElementsByClassName('file-menu')[0].innerHTML = prefix;
+    inputpath.value = path;
   },path);
+
+
 }
 
 function bdisconnect() {
+  tabs = [];
   disconnect(null);
   connected = false;
 }
 
+
+function select() {
+  //Update actions for stuff.
+  //Aka re-naming files only works with 1 file/folder.
+  let a = countCheck();
+  file_del.disabled = a<1;
+}
+
+window.addEventListener('click',select);
+
+function countCheck() {
+  let a = 0;
+  [...document.getElementsByClassName('file-select')].forEach((item, i) => {
+    if (item.checked) {a++;}
+  });
+  return a;
+}
+
+
 function openFolder(n) {
   path += "/" + n;
   refreshDir();
+  switchTab(tab);
 }
 
 function inputPath(e) {
@@ -77,6 +164,7 @@ function inputPath(e) {
     //e.preventDefault();
     path = e.srcElement.value;
     refreshDir();
+    switchTab(tab);
   }
 }
 
@@ -84,6 +172,7 @@ function resetPath() {
   getCwd((r) => {
     path = r;
     refreshDir();
+    switchTab(tab);
   });
 }
 
@@ -92,6 +181,7 @@ function backPath() {
   if (i==-1) {alert('You can\'t go back a folder, your in root folder!');return;}
   path = path.slice(0,i);
   refreshDir();
+  switchTab(tab);
 }
 
 setInterval(function () {
@@ -101,6 +191,24 @@ setInterval(function () {
     if (d2.Error&&connected) {connected = false;alert('Connection error:\n'+d2.Message);}
   });
 },30*1000);
+
+const download = (path, filename) => {
+    // Create a new link
+    const anchor = document.createElement('a');
+    anchor.href = path;
+    anchor.download = filename;
+
+    // Append to the DOM
+    document.body.appendChild(anchor);
+
+    // Trigger `click` event
+    anchor.click();
+
+    // Remove element from DOM
+    document.body.removeChild(anchor);
+};
+
+
 </script>
 
 <style>
@@ -112,8 +220,10 @@ setInterval(function () {
 
 .file {
   background-color: gray;
+  width:90%;
 
-
+  float:right;
+  overflow:hidden;
 }
 
 .file:hover {
@@ -139,5 +249,13 @@ setInterval(function () {
   height:50%;
   background-color: darkgray;
   overflow: scroll;
+}
+
+
+.file-select {
+  float: left;
+  width:20px;
+  height:20px;
+  overflow:hidden;
 }
 </style>

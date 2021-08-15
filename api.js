@@ -14,9 +14,11 @@ let currentId = 0;
 
 class FilePermission {
   Path = "";
-  Read = true;
-  Write = false;
-  Execute = false;
+  Read = true;//Read files..
+  Write = false;//Write to files
+  Execute = false;//Exec files...
+  ReadDir = true;//Read directory.
+  Delete = true;//Delete files...
 
   constructor(p,r,w,e) {
     this.Path = path.resolve(p);
@@ -93,6 +95,8 @@ Server.ServerEvent.on('disconnect', (req,res,url,ip) => {
     res.end(JSON.stringify({Message:'Failed to disconnect, not connected yet!',Error:true}));
     return;
   }
+
+  console.info('[INFO] Client left!')
 
   Server.Clients.splice(item,1);
   res.writeHead(200,{'Content-Type':'text/plain'});
@@ -171,7 +175,6 @@ Server.ServerEvent.on('readfile',(req,res,url,ip) => {//READ FILE THINGY
 
   let s = fs.statSync(p);
 
-  console.info(p);
 
   if (!s.isFile()) {
     res.writeHead(401,{'Content-Type':'text/plain'});
@@ -218,10 +221,16 @@ Server.ServerEvent.on('dir',(req,res,url,ip) => {//HAS ERROR CODE
 
   let perm = item.FilePermissions.find(elem => elem.InPath(p));
 
-  if (perm==undefined) {
+  if (perm==undefined||perm.ReadDir) {
     //error
     res.writeHead(401,{'Content-Type':'text/plain'});
     res.end(JSON.stringify({Message:'No file permissions!',Error:true,Code:'ACCESS_DENIED',Data:[]}));
+    return;
+  }
+
+  if (!fs.existsSync(p)) {
+    res.writeHead(400,{'Content-Type':'text/plain'});
+    res.end(JSON.stringify({Message:'Error folder doesn\'t exist',Data:[],Error:true,Code:'FOLDER_NOT_FOUND'}));
     return;
   }
 
@@ -273,6 +282,77 @@ Server.ServerEvent.on('cwd',(req,res,url,ip) => {//HAS ERROR CODE
 
 
 
+
+
+
+
+Server.ServerEvent.on('deletefile',(req,res,url,ip) => {//HAS ERROR CODE
+  let item = Server.Clients.find(elem => elem.Ip==ip);
+  if (item==undefined) {
+    //error
+    res.writeHead(400,{'Content-Type':'text/plain'});
+    res.end(JSON.stringify({Message:'Failed to read directory, client not connected!',Data:[],Error:true,Code:'NOT_CONNECTED'}));
+    return;
+  }
+
+  let q = url.query ?? {Path:"./file"};
+
+  if (q.Path==undefined) {q.Path = "./file";}
+
+
+
+  let p = path.resolve(q.Path);
+
+
+  let perm = item.FilePermissions.find(elem => elem.InPath(p));
+
+  if (perm==undefined||perm.Delete) {
+    //error
+    res.writeHead(401,{'Content-Type':'text/plain'});
+    res.end(JSON.stringify({Message:'No file permissions!',Error:true,Code:'ACCESS_DENIED',Data:[]}));
+    return;
+  }
+
+  if (!fs.existsSync(p)) {
+    res.writeHead(400,{'Content-Type':'text/plain'});
+    res.end(JSON.stringify({Message:'Error file doesn\'t exist',Data:[],Error:true,Code:'FILE_NOT_FOUND'}));
+    return;
+  }
+
+  let s = fs.statSync(p);
+
+
+  fs.promises.readdir(p).then((d) => {
+    //res.writeHead(200,{'Content-Type':'text/plain'});
+    //res.end(JSON.stringify({Message:'Sucessfully read directory!',Data:d,Error:false,Code:'NONE'}));
+
+    let out = [];
+
+    d.forEach((item, i) => {
+      let stat = fs.statSync(path.resolve(p)+"/"+item);
+      out = out.concat({Name:item,IsFolder:stat.isDirectory()});
+    });
+
+
+    res.writeHead(200,{'Content-Type':'text/plain'});
+    res.end(JSON.stringify({Message:'Sucessfully read directory!',Data:out,Error:false,Code:'NONE'}));
+
+  }).catch((e) => {
+    res.writeHead(400,{'Content-Type':'text/plain'});
+    res.end(JSON.stringify({Message:'Error reading directory.',Data:[],Error:true,Code:'INTERNAL_ERROR'}));
+  });
+
+
+});
+
+
+
+
+
+
+
+
+
 Server.ServerEvent.on('error', (msg,code,req,res)=> {
   res.writeHead(code,{'Content-Type':'text/plain'});
   res.end(`ERROR ${code}\n${msg}`);
@@ -286,7 +366,7 @@ module.exports = Server;
 setInterval(function () {
   for (var i = 0; i < Server.Clients.length; i++) {
     let c = Server.Clients[i];
-    if ((c.LastPing+60*1000)<Date.now()) {Server.Clients.splice(i,1);i--;}
+    if ((c.LastPing+60*1000)<Date.now()) {consle.info(`[INFO] Client left!`);Server.Clients.splice(i,1);i--;}
   }
 
 },30*1000);
