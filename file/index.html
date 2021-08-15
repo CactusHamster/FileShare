@@ -1,0 +1,143 @@
+<div class="connection">
+
+<input type="text" id="namein" placeholder="Enter your name here!"></input><br>
+<button onclick="bconnect();">Connect</button><br>
+<button onclick="bdisconnect();">Disconnect</button>
+
+</div>
+
+
+
+<br>
+
+
+
+<div class="file-explorer" height='200px'>
+
+</div>
+
+
+<script defer src="./api.js"></script>
+
+
+<script>
+let connected = false;
+
+let path = "./file";
+
+function bconnect() {
+  getCwd((p) => {
+    path = p;
+    connect(null,namein.value);
+    connected = true;
+
+    refreshDir();
+
+  });
+}
+
+function refreshDir() {
+  getDir((d) => {
+    let d2 = JSON.parse(d);
+    let out = "A client-side error occured while reading directory.";
+    if (d2.Error) {
+      out = d2.Message+"<br>"+d2.Code;
+    } else {
+      out = "<br>";
+      d2.Data.forEach((item, i) => {
+
+        if (item.IsFolder) {out += `<div onclick="openFolder('${item.Name}')" class='file' ><img src="folder.png" class='file-image'></img><text class='file-text'>${item.Name}</text></div><br>`;} else {
+          out += `<div onclick="alert('You can\\'t open a file as a directory!');" class='file' ><img src="file.png" class='file-image'></img><text class='file-text'>${item.Name}</text></div><br>`;
+        }
+
+
+      });
+
+    }
+
+    let prefix = `<button onclick="backPath();">&lt;- Back</button><input type='text' onkeydown="inputPath(event);" value='${path}'></input><button onclick="resetPath();">CWD</button>`;
+
+
+    document.getElementsByClassName('file-explorer')[0].innerHTML = prefix + out;
+  },path);
+}
+
+function bdisconnect() {
+  disconnect(null);
+  connected = false;
+}
+
+function openFolder(n) {
+  path += "/" + n;
+  refreshDir();
+}
+
+function inputPath(e) {
+  if (e.keyCode==13) {
+    //e.preventDefault();
+    path = e.srcElement.value;
+    refreshDir();
+  }
+}
+
+function resetPath() {
+  getCwd((r) => {
+    path = r;
+    refreshDir();
+  });
+}
+
+function backPath() {
+  let i = path.lastIndexOf("/");
+  if (i==-1) {alert('You can\'t go back a folder, your in root folder!');return;}
+  path = path.slice(0,i);
+  refreshDir();
+}
+
+setInterval(function () {
+  ping((d) => {
+    //Check if an error occured.
+    let d2 = JSON.parse(d);
+    if (d2.Error&&connected) {connected = false;alert('Connection error:\n'+d2.Message);}
+  });
+},30*1000);
+</script>
+
+<style>
+
+@font-face {
+  font-family: pixel;
+  src: url(./pixelated.woff) format("woff");
+}
+
+.file {
+  background-color: gray;
+
+
+}
+
+.file:hover {
+  background-color: skyblue;
+}
+
+.file-image {
+  position: relative;
+  left: 10px;
+  background-color: inherit;
+
+}
+
+.file-text {
+  font-family: pixel;
+  font-size: 30px;
+  position: relative;
+  left: 20px;
+  background-color: inherit;
+}
+
+.file-explorer {
+  height:50%;
+  background-color: darkgray;
+  overflow: scroll;
+}
+</style>
