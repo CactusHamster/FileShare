@@ -180,6 +180,7 @@ function backPath() {
   let i = path.lastIndexOf("/");
   if (i==-1) {alert('You can\'t go back a folder, your in root folder!');return;}
   path = path.slice(0,i);
+  if (path=="") {path = "/";}
   refreshDir();
   switchTab(tab);
 }
