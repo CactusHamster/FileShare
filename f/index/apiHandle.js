@@ -15,30 +15,25 @@ function httpGetAsync(theUrl, callback)
     xmlHttp.send('test');
     xmlHttp.onerror = function() {
       connected = false;
-      if (!httpError) {alert('An unexpected connection error occured, the server might\'ve crashed.');}
+      if (!httpError) {alert('An unexpected error occurred! Our server may have crashed.');}
       httpError = true;
     }
 }
 
-function connect(callback,name) {
-  httpGetAsync(location.origin+"/api/connect?Name="+name,callback);
-}
 
 function ping(callback) {
   httpGetAsync(location.origin+"/api/ping",callback);
 }
 
-function disconnect(callback) {
-  httpGetAsync(location.origin+"/api/disconnect",callback);
-}
+
 
 function isConnected(callback) {
   httpGetAsync(location.origin+"/api/isconnected",callback);
 }
 
 
-function getDir(callback,path2) {
-  httpGetAsync(location.origin+"/api/dir?Path="+path2,callback);
+function getDir(callback,path) {
+  httpGetAsync(location.origin+"/api/getfiles?path="+path,callback);
 }
 
 function getCwd(callback) {

@@ -1,0 +1,180 @@
+<head>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+<meta charset="UTF-8">
+<title>File Explorer</title>
+</head>
+
+<style>
+
+@font-face {
+  font-family: pixel;
+  src: url(./f/pixelated.woff) format("woff");
+}
+
+.file {
+  background-color: gray;
+  width:100%;
+
+  float:left;
+  overflow:hidden;
+}
+
+.file:hover {
+  background-color: skyblue;
+}
+
+.file-image {
+  position: relative;
+  left: 10px;
+  background-color: inherit;
+
+}
+
+.file-text {
+  font-family: pixel;
+  font-size: 30px;
+  position: relative;
+  left: 20px;
+  background-color: inherit;
+}
+
+.file-explorer {
+  /*height: 50%;*/
+  width: 50%;
+  background-color: darkgray;
+  overflow: scroll;
+}
+.command-prompt {
+-webkit-appearance: none;
+text-align: center;
+  width: 50%;
+  overflow: scroll;
+  height:83%;
+  background:black;
+}
+
+
+.file-select {
+  float: left;
+  width:20px;
+  height:20px;
+  overflow:hidden;
+}
+
+
+.connectButton {
+	float: left;
+	padding: 4px;
+	border: 1px black;
+	border-radius: 3px;
+	background: rgb(16, 165, 119);
+}
+.connectButton:hover {
+	background: rgb(36, 195, 149);
+}
+.connectBox:hover {
+	/*background: rgb(76, 1945, 189);*/
+	background: rgb(255, 167, 134);
+}
+.connectBox:active {
+	background: rgb(16, 165, 119);
+}
+.connectBox {
+	padding: 4px;
+	border: 1px black;
+	border-radius: 3px;
+	background: rgb(255, 255, 255);
+}
+.cmdin {
+	-webkit-appearance: none;
+	padding: 10px;
+	width: 100%;
+	color: white;
+	background: black;
+}
+
+.folderControls {
+	width: 50%;
+	float:left;
+}
+.cmdControls {
+	width: 50%;
+	float:left;
+}
+</style>
+
+
+
+<body>
+
+<div class="connectDiv">
+<input type="text" class="connectBox" style="width: 30%" id="nameBox" placeholder="CONNECTION USERNAME (Required)"></input>
+<button class="connectButton" onclick="disconnect();" style="float:left">Disconnect</button>
+<button class="connectButton" onclick="connect();" style="float:left">Connect</button>
+</div>
+
+<br>
+<!--
+<div class='file-tabs'></div>
+-->
+<div class="file-menu">
+<!--
+  <button onclick="newtab();">New Tab</button><button onclick="deltab();">Delete Tab</button>
+-->
+  <br>
+  <br>
+  <div class="folderControls">
+	<button onclick="backPath();">&lt;-</button>
+	<input style="width: 40%" type='text' onkeydown="inputPath(event);" id='inputpath' value='C:\'></input>
+	<button onclick="resetPath();">CWD</button>
+  </div>
+  <div class="cmdControls">
+	<input class="connectButton" type="button" value="clear" onclick="document.getElementById('cmddiv').value = '<textarea class=\'cmdin\' style=\'float:none\' id=\'cmdin\'></textarea>'"></input>
+	<label style="float: left; padding: 4px;border: 1px black;border-radius: 3px;">&nbsp;Show exit codes<input id="prCodeCheck" type="checkbox"></input></label>
+  </div>
+  
+  
+  
+  <br>
+	<!--<input type='text' placeholder='Name of file here!'/><br>
+  <button onclick="'delete();'+1" disabled id="file_del">Delete</button>-->
+</div>
+
+<br>
+<div>
+<div class="file-explorer" style="height:83%;float:left"></div>
+	<div id='cmddiv' class="command-prompt" style="float:left; padding:0px; border:none;">
+		<textarea class="cmdin" style="float:none" id="cmdin"></textarea>
+		<div id="stdoutdiv" style="padding: 10px"></div>
+	</div>
+</div>
+
+</body>
+
+<script defer src="/f/index/apiHandle.js"></script>
+<script defer src="/f/index/main.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
