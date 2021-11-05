@@ -1,6 +1,6 @@
 let httpError = false;
 
-function httpGetAsync(theUrl, callback)
+function httpGetAsync(url, callback, headers = {}, reqType="GET")
 {
 
     var xmlHttp = new XMLHttpRequest();
@@ -11,7 +11,12 @@ function httpGetAsync(theUrl, callback)
           callback(xmlHttp.responseText);
         }
     }
-    xmlHttp.open("GET", theUrl, true); // true for asynchronous
+    xmlHttp.open(reqType, url, true); // true for asynchronous
+	
+	for (headerName in headers) {
+		xmlHttp.setRequestHeader(headerName,headers[headerName])
+	}
+	
     xmlHttp.send('test');
     xmlHttp.onerror = function() {
       connected = false;

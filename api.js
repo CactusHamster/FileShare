@@ -200,6 +200,10 @@ class api extends EventEmitter {
 			if (!this.checkIp(ip, res)) return;
 			this.emit('cmd', req, res, url, ip)
 		}
+		else if (url.pathname.startsWith('/api/write')) {
+			if (!this.checkIp(ip, res)) return;
+			this.emit('writeFile', req, res, url, ip)
+		}
 		else {
 			res.end('no command found')
 		}
@@ -303,12 +307,24 @@ api.on('cmdclear', function (req, res, url, ip) {
 
 api.on('cmdstop', function (req, res, url, ip) {
 	if (api.clients[ip].cmd == undefined || api.clients[ip].cmd == null) {
-		
+		res.writeHead(200,{'Content-Type':'text/plain'});
+		res.end('nothing running')
+		return
 	}
-	
+	api.clients[ip].cmd.exit()
+	res.writeHead(200,{'Content-Type':'text/plain'});
+	res.end('success')
 	
 	
 } )
+
+
+
+api.on('writeFile', function (req, res, url, ip) {
+	res.writeHead(200,{'Content-Type':'text/plain'});
+	res.end('success')
+})
+
 
 
 

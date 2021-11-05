@@ -12,6 +12,7 @@ let download = (url, filename) => {
 
 let inter;
 let cmdinter;
+let cmdinterTime = 1000
 
 function connect () {
 	let value = document.getElementById('nameBox').value
@@ -195,7 +196,7 @@ function refreshcmd () {
 			let clr = "white"
 			if (cmd.startsWith('ERR')) clr = "red"
 			if (cmd.startsWith('CRITERR')) {
-				clr = "yellow"
+				clr = "grey"
 				cmd = 'That command does not exist or you do not have permission to use it.'
 			}
 			if (cmd.startsWith('EXIT')) {
@@ -219,7 +220,7 @@ function cmd (command) {
 		let d = document.getElementById('stdoutdiv')
 		if (data == 'unauthorized') return d.innerHTML = '<p style="color:white">403: UNAUTHORIZED</p>'+d.innerHTML
 		d.innerHTML = data+d.innerHTML
-		if (cmdinter == undefined || cmdinter == null) cmdinter = setInterval(refreshcmd, 400)
+		if (cmdinter == undefined || cmdinter == null) cmdinter = setInterval(refreshcmd, cmdinterTime)
 	})
 }
 
@@ -272,6 +273,43 @@ cmdin.addEventListener('keydown', function (e) {
 		cmdrecent(false)
 	}
 })
+
+
+
+
+var _readFileText=function(input,callback){
+		var len=input.files.length,_files=[],res=[], names=[]
+		var readFile=function(filePos){
+			if(!filePos){
+				callback(false,res);
+			}else{
+				var reader=new FileReader();
+				reader.onload=function(e){              
+					res.push({text: e.target.result, name: names[res.length]});
+					readFile(_files.shift());
+				};
+				//reader.readAsDataURL(filePos);
+				reader.readAsText(filePos)
+				names.push(filePos.name)
+			}
+		};
+		for(var x=0;x<len;x++){
+			_files.push(input.files[x]);
+		}
+		readFile(_files.shift());
+	}
+
+document.getElementsByName('fileUploadInput')[0].addEventListener('change', function (e) {
+	_readFileText(this,function(err,files){
+           if(err){return}
+		   httpGetAsync(location.origin+'/api/write', function () {
+			   listFiles()
+		   }, {files: files})
+     });
+	
+})
+
+
 
 
 

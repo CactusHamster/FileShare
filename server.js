@@ -9,12 +9,13 @@ let api = require('./api.js')
 function sendfile (req, res, file) {
 	readFile(file, function (err, data) {
 		if (err) {
-			res.writeHead(301,{'Content-Type':'text/html','Location':'/f/404.html'});
+			res.writeHead(404,{'Content-Type':'text/html','Location':'/f/404.html'});
 			res.end('ERROR 404: FILE NOT FOUND');
 			return;
 		}
 		if (file.endsWith('.html')) {res.writeHead(200,{'Content-Type':'text/html'})}
 		else if (file.endsWith('.js')) {res.writeHead(200,{'Content-Type':'text/javascript'})}
+		else if (file.endsWith('.css')) {res.writeHead(200,{'Content-Type':'text/css'})}
 		else {res.writeHead(200,{'Content-Type':'text/plain'})}
 		res.end(data)
 	})
@@ -26,7 +27,7 @@ function sendfile (req, res, file) {
 http.createServer((req, res)=>{
 	let ip = req.socket.remoteAddress;
 	let url = URL.parse(req.url,true);
-	
+	console.info(req.url)
 	if (url.pathname === "/") {
 		sendfile(req, res, './main.html');
 		return;
