@@ -1,5 +1,5 @@
 let http = require('http');
-let PORT = process.env.port ?? 8080
+let PORT = process.env.PORT ?? 8080
 let URL = require('url');
 const { readFile, readFileSync } = require('fs');
 let favicon = readFileSync('./favicon.ico');
