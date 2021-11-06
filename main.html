@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <title>File Explorer</title>
 <link rel="stylesheet" href="/f/index/index.css"></link>
+<link rel="stylesheet" href="/f/index/switches.css"></link>
 </head>
 
 
-<body>
+<body style="overflow:hidden">
 
 <div class="connectDiv">
 <input type="text" class="connectBox" style="width: 30%" id="nameBox" placeholder="CONNECTION USERNAME (Required)"></input>
@@ -15,7 +16,6 @@
 <button class="connectButton" onclick="connect();" style="float:left">Connect</button>
 </div>
 
-<br>
 <!--
 <div class='file-tabs'></div>
 -->
@@ -25,20 +25,36 @@
 -->
   <br>
   <br>
-  <div class="folderControls">
-	<input type="button" class="fileControlButton" onclick="backPath();" value="&lt;-"></input>
-	<input style="width: 40%" type='text' overflow="scroll" onkeydown="inputPath(event);" id='inputpath' value='C:\'></input>
-	<input type="button"  class="fileControlButton " onclick="resetPath();" value="CWD"></input>
-	
-	<label class="fileControlButton" style="display:inline-block;">
-		Upload File
-		<input style="display:none;" type="file" name="fileUploadInput" multiple="multiple">
-	</label>
+	<div class="folderControls">
+		<input type="button" class="fileControlButton" onclick="backPath();" value="&lt;-"></input>
+		<input style="width: 40%" type='text' overflow="scroll" onkeydown="inputPath(event);" id='inputpath' value='C:\'></input>
+		<input type="button"  class="fileControlButton " onclick="resetPath();" value="CWD"></input>
+		
+		<label class="fileControlButton" style="display:inline-block;">
+			Upload File
+			<input style="display:none;" type="file" name="fileUploadInput" multiple="multiple">
+		</label>
+		
+		<!--<input class="noDispButton" value="   |   " type="button"></input>-->
+		
+		<br>
+		
+		<input type="checkbox" id="FileCreateSwitch" class="checkbox" />
+		<label style="text-align:center;" for="FileCreateSwitch" class="toggle">
+			<p style="text-align:center;" class="noSelect switchtxt">&nbsp;&nbsp;&nbsp;&nbsp;File&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Folder</p>
+		</label>
+		<input id='newFileNameBox' placeholder="Filename"></input>
+		<input type="button" value="Create" class="fileControlButton" onclick="createFileButtonHandler()"></input>
+		
 
-  </div>
+	</div>
+	<!--<br style="height:100%"></br>-->
   <div class="cmdControls">
-	<input class="connectButton" type="button" value="clear" onclick="document.getElementById('cmddiv').value = '<textarea class=\'cmdin\' style=\'float:none\' id=\'cmdin\'></textarea>'"></input>
+	<input class="connectButton" type="button" value="clear" onclick="clearcmd()"></input>
 	<label style="float: left; padding: 4px;border: 1px black;border-radius: 3px;">&nbsp;Show exit codes<input id="prCodeCheck" type="checkbox"></input></label>
+	<br>
+	<br>
+	<br>
   </div>
   
   

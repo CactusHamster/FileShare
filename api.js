@@ -2,9 +2,12 @@ require('colors')
 const paths = require('path')
 const { statSync, createReadStream } = require('fs')
 const { EventEmitter } = require('events');
-const { readdir } = require('fs/promises')
+const { readdir, appendFile, mkdir } = require('fs/promises')
 let testmode = (process.argv.includes('-t') || process.argv.includes('--test'))
+let deletemode = (process.argv.includes('-d') || process.argv.includes('--delete'))
 if (testmode) console.info('Running with testmode!'.brightGreen)
+
+//let formidable = require('formidable');
 
 let pingTimeoutMinutes = 15
 
@@ -131,29 +134,7 @@ class api extends EventEmitter {
 			//console.info(e)
 			internalError(res)
 		}
-	}
-	
-	
-	async delete (req, res, ip, query) {
-		var path = query.path
-		if (path == undefined || path == null) {
-			internalError(res)
-		}
-		try {
-			unlinkSync(path);
-			res.writeHead(200, {'Content-Type':'text/plain'});
-			res.end('success')
-		} catch (err) {
-			internalError(res)
-		}
-	}
-	
-	
-	
-	
-	
-	
-	
+	}	
 	
 	apiHandle(req, res, url, ip) {
 		if (url.pathname.startsWith("/api/connect")) {
@@ -203,6 +184,18 @@ class api extends EventEmitter {
 		else if (url.pathname.startsWith('/api/write')) {
 			if (!this.checkIp(ip, res)) return;
 			this.emit('writeFile', req, res, url, ip)
+		}
+		else if (url.pathname.startsWith('/api/create/dir')) {
+			if (!this.checkIp(ip, res)) return;
+			this.emit('mkdir', req, res, url, ip)
+		}
+		else if (url.pathname.startsWith('/api/create/file')) {
+			if (!this.checkIp(ip, res)) return;
+			this.emit('touch', req, res, url, ip)
+		}
+		else if (url.pathname.startsWith('/api/unlink')) {
+			if (!this.checkIp(ip, res)) return;
+			this.emit('delete', req, res, url, ip)
 		}
 		else {
 			res.end('no command found')
@@ -311,7 +304,7 @@ api.on('cmdstop', function (req, res, url, ip) {
 		res.end('nothing running')
 		return
 	}
-	api.clients[ip].cmd.exit()
+	api.clients[ip].cmd.kill()
 	res.writeHead(200,{'Content-Type':'text/plain'});
 	res.end('success')
 	
@@ -321,8 +314,71 @@ api.on('cmdstop', function (req, res, url, ip) {
 
 
 api.on('writeFile', function (req, res, url, ip) {
-	res.writeHead(200,{'Content-Type':'text/plain'});
-	res.end('success')
+	let path = String(url.query.path)
+	if (!path) {
+		res.writeHead(400,{'Content-Type':'text/plain'});
+		res.end('invalid path')
+	}
+	
+	  req.on('data', chunk => {
+		//console.log(`Data chunk available: ${chunk}`)
+		appendFile(path.toString(), chunk)
+		.catch((e) => {
+			console.info(e)
+		})
+	  })
+	  req.on('end', () => {
+		res.writeHead(200,{'Content-Type':'text/plain'});
+		res.end('success')
+	  })
+})
+
+
+api.on('touch', function (req, res, url, ip) {
+	let path = String(url.query.path)
+	appendFile(path.toString(), '')
+	.then(()=>{
+		res.writeHead(200,{'Content-Type':'text/plain'});
+		res.end('success')	
+	})
+	.catch((e) => {
+		console.info(e)
+		res.writeHead(400,{'Content-Type':'text/plain'});
+		res.end('failure')	
+	})
+})
+api.on('mkdir', function (req, res, url, ip) {
+	let path = String(url.query.path)
+	mkdir(path.toString(), {recursive: true})
+	.then(()=>{
+		res.writeHead(200,{'Content-Type':'text/plain'});
+		res.end('success')	
+	})
+	.catch((e) => {
+		console.info(e)
+		res.writeHead(400,{'Content-Type':'text/plain'});
+		res.end('failure')	
+	})
+	
+})
+
+
+
+
+api.on('delete', function (req, res, url, ip) {
+
+	var path = String(url.query.path)
+	if (path == undefined || path == null || path == '') {
+		internalError(res)
+	}
+	try {
+		unlinkSync(path);
+		res.writeHead(200, {'Content-Type':'text/plain'});
+		res.end('success')
+	} catch (err) {
+		internalError(res)
+	}
+	
 })
 
 

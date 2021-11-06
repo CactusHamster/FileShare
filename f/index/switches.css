@@ -1,0 +1,48 @@
+
+        /* toggle in label designing */
+        .toggle {
+			text-align:center;
+			top:7px;
+            position : relative;
+            display : inline-block;
+            width : 120px;
+            height : 20px;
+            background-color: #e5e3ff;  /*The background of the blue side*/
+            border-radius: 3%;
+            border: 2px solid #aba07e;
+        }
+                
+        /* After slide changes */
+        .toggle:after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 18px;
+            border-radius: 3%;
+            background-color: #aba07e;
+            top: 1px; 
+            left: 1px;
+            transition:  all 0.5s;
+        }
+                
+        /* Toggle text */
+        .switchtxt {
+			position: absolute;
+			top: -15px;
+			text-align:center;
+        }
+                
+        /* Checkbox checked effect */
+        .checkbox:checked + .toggle::after {
+            left : 59px; 
+        }
+                
+        /* Checkbox checked toggle label bg color */
+        .checkbox:checked + .toggle {
+            background-color: #e8ffe6; /*The background of the green side*/
+        }
+                
+        /* Checkbox vanished */
+        .checkbox { 
+            display : none;
+        }

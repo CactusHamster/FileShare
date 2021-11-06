@@ -14,6 +14,9 @@ let inter;
 let cmdinter;
 let cmdinterTime = 1000
 
+let refreshDirInterval;
+let refreshDirIntervalMS = 1000
+
 function connect () {
 	let value = document.getElementById('nameBox').value
 	if (value == '' || value == null) {
@@ -47,6 +50,8 @@ function connect () {
 		alert('Connected as '+String(value)+'!')
 		listFiles()
 		clearInterval(inter)
+		clearInterval(refreshDirInterval)
+		refreshDirInterval = setInterval(listFiles, refreshDirIntervalMS)
 		inter = setInterval(function () {
 			httpGetAsync(location.origin+"/api/ping", function (data) {
 				if (data == 'unauthorized') {
@@ -70,6 +75,7 @@ function disconnect (hidealert=false) {
 		if (hidealert) alert('Successfully disconnected!')
 		clearInterval(inter)
 		clearInterval(cmdinter); cmdinter = null;
+		clearInterval(refreshDirInterval); refreshDirInterval = null;
 	})
 
 }
@@ -88,15 +94,22 @@ function disconnect (hidealert=false) {
 
 function listFiles() {
 	let path = String(inputpath.value)
+	PATH = path
 	getDir((data) => {
 	try {
 		data = JSON.parse(data);
 	} catch (e) {
 		let out = "That directory doesn't exist!";
 		if (data.includes('operation not permitted')) {out = "ACCESS DENIED"}
-		if (data === 'unauthorized') {out = "403 Unauthorized"}
+		if (data === 'unauthorized') {
+			clearInterval(inter)
+			clearInterval(cmdinter); cmdinter = null;
+			clearInterval(refreshDirInterval); refreshDirInterval = null;	
+			out = "403 Unauthorized"
+		}
 		else if (data.includes('resource busy or locked')) out = "That file is busy or locked!"
-		return document.getElementsByClassName('file-explorer')[0].innerHTML = out;
+		
+		return document.getElementsByClassName('file-explorer')[0].innerHTML = out;	
 	}
 	out = "<br>";
 	data.forEach((item) => {
@@ -131,7 +144,7 @@ function openFolder (name) {
 
 function inputPath(e) {
 	if (e.keyCode == 13) listFiles()
-	console.info(e.keyCode)
+	//console.info(e.keyCode)
 }
 
 function backPath() {
@@ -231,6 +244,11 @@ function clearcmd() {
 		d.innerHTML = '<p></p>'
 	})
 }
+
+
+
+
+
 function cancelcmd() {
 	httpGetAsync(location.origin+'/api/cmdstop', function (data) {
 		let d = document.getElementById('stdoutdiv')
@@ -278,39 +296,78 @@ cmdin.addEventListener('keydown', function (e) {
 
 
 var _readFileText=function(input,callback){
-		var len=input.files.length,_files=[],res=[], names=[]
-		var readFile=function(filePos){
-			if(!filePos){
-				callback(false,res);
-			}else{
-				var reader=new FileReader();
-				reader.onload=function(e){              
-					res.push({text: e.target.result, name: names[res.length]});
-					readFile(_files.shift());
-				};
-				//reader.readAsDataURL(filePos);
-				reader.readAsText(filePos)
-				names.push(filePos.name)
-			}
-		};
-		for(var x=0;x<len;x++){
-			_files.push(input.files[x]);
+	var len=input.files.length,_files=[],res=[], names=[]
+	var readFile=function(filePos){
+		if(!filePos){
+			callback(false,res);
+		}else{
+			var reader=new FileReader();
+			reader.onload=function(e){              
+				res.push({text: e.target.result, name: names[res.length]});
+				readFile(_files.shift());
+			};
+			//reader.readAsDataURL(filePos);
+			reader.readAsText(filePos)
+			names.push(filePos.name)
 		}
-		readFile(_files.shift());
+	};
+	for(var x=0;x<len;x++){
+		_files.push(input.files[x]);
 	}
+	readFile(_files.shift());
+}
+
+
+
+const upload = (file, path) => {
+  fetch(location.origin+'/api/write?path='+path, { // Your POST endpoint
+    method: 'POST',
+    headers: {
+      //"Content-Type": "You will perhaps need to define a content-type here"
+    },
+    body: file // This is your file object
+  })/*.then(
+    response => console.info(response) //response.json() // if the response is a JSON object
+  ).then(
+    success => console.log(success) // Handle the success response object
+  ).catch(
+    error => console.log(error) // Handle the error response object
+  );*/
+};
+
+
+
+function createFileButtonHandler () {
+	let checked = document.getElementById('FileCreateSwitch').checked
+	let type = checked ? 'file' : 'dir'
+	let name = document.getElementById('newFileNameBox').value
+	if (+name == 0) return;
+	httpGetAsync(location.origin+'/api/create/'+type+'?path='+PATH+'/'+name, function (ret) {
+		console.info(ret)
+	})
+	
+}
+
+
+
+
 
 document.getElementsByName('fileUploadInput')[0].addEventListener('change', function (e) {
 	_readFileText(this,function(err,files){
            if(err){return}
-		   httpGetAsync(location.origin+'/api/write', function () {
-			   listFiles()
-		   }, {files: files})
+		   for (file of files) {
+			   upload(file.text, PATH+'/'+file.name)
+		   }
      });
 	
 })
 
 
-
+document.getElementById('deleteButton').addEventListener('click', function () {
+	
+	
+	
+})
 
 
 

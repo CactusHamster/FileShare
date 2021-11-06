@@ -4,7 +4,8 @@ let URL = require('url');
 const { readFile, readFileSync } = require('fs');
 let favicon = readFileSync('./favicon.ico');
 let api = require('./api.js')
-
+let testmode = (process.argv.includes('-t') || process.argv.includes('--test'))
+require('colors')
 
 function sendfile (req, res, file) {
 	readFile(file, function (err, data) {
@@ -24,10 +25,10 @@ function sendfile (req, res, file) {
 
 
 
-http.createServer((req, res)=>{
+http.createServer((req/*, {maxHeaderSize: 6000000000}*/, res)=>{
 	let ip = req.socket.remoteAddress;
 	let url = URL.parse(req.url,true);
-	console.info(req.url)
+	if (testmode) console.info(req.url.toString().blue)
 	if (url.pathname === "/") {
 		sendfile(req, res, './main.html');
 		return;

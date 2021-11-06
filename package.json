@@ -1,5 +1,24 @@
 {
   "dependencies": {
     "colors": "^1.4.0"
-  }
+  },
+  "scripts": {
+    "start": "node server.js --delete"
+  },
+  "name": "fileshare",
+  "version": "1.0.0",
+  "main": "api.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CactusHamster/FileShare.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CactusHamster/FileShare/issues"
+  },
+  "homepage": "https://github.com/CactusHamster/FileShare#readme",
+  "description": ""
 }
