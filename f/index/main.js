@@ -329,6 +329,9 @@ const upload = (file, path) => {
       //"Content-Type": "You will perhaps need to define a content-type here"
     },
     body: file // This is your file object
+  })
+  .then(response => {
+	  listFiles()
   })/*.then(
     response => console.info(response) //response.json() // if the response is a JSON object
   ).then(
@@ -344,11 +347,10 @@ function createFileButtonHandler () {
 	let checked = document.getElementById('FileCreateSwitch').checked
 	let type = checked ? 'file' : 'dir'
 	let name = document.getElementById('newFileNameBox').value
-	if (+name == 0) return;
+	if (name == '') return;
 	httpGetAsync(location.origin+'/api/create/'+type+'?path='+PATH+'/'+name, function (ret) {
-		console.info(ret)
+		listFiles()
 	})
-	
 }
 
 
