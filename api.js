@@ -275,6 +275,7 @@ api.on('cmd', function (req, res, url, ip) {
 		return;
 	}
 	api.clients[ip].cmd.stdout.on('data', function (data) {
+		if (!api.clients[ip].cmdData) api.clients[ip].cmdData = []
 		api.clients[ip].cmdData.push('DATA:::'+data.toString())
 	})
 	

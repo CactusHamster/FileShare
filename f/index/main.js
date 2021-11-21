@@ -194,6 +194,7 @@ function refreshcmd () {
 			return;
 		}
 		try {
+			if (cmddata == '') {cmddata = "[]"}
 			jcmd = JSON.parse(cmddata)
 		}
 		catch (e) {
