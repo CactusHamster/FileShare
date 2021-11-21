@@ -362,14 +362,13 @@ document.getElementsByName('fileUploadInput')[0].addEventListener('change', func
 	
 })
 
-
+/*
 document.getElementById('deleteButton').addEventListener('click', function () {
 	
 	
 	
 })
-
-
+*/
 
 resetPath()
 //listFiles()
