@@ -60,7 +60,9 @@ function connect () {
 					clearInterval(inter)
 					clearInterval(cmdinter); cmdinter = null;
 				}
-				//console.info('PING')
+				else if (data.includes('noSignOn')) {
+					clearInterval(inter)
+				}
 			})
 		}, 5*60*1000)
 	})
