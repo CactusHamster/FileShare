@@ -274,8 +274,8 @@ api.on('cmd', function (req, res, url, ip) {
 		res.end(JSON.stringify(e))
 		return;
 	}
+	if (!api.clients[ip].cmdData) api.clients[ip].cmdData = []
 	api.clients[ip].cmd.stdout.on('data', function (data) {
-		if (!api.clients[ip].cmdData) api.clients[ip].cmdData = []
 		api.clients[ip].cmdData.push('DATA:::'+data.toString())
 	})
 	
