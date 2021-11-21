@@ -160,7 +160,7 @@ function backPath() {
 		return;
 	}
 	var e = Math.max(t.lastIndexOf('/'), t.lastIndexOf('\\'))
-	if (e < 2) return;
+	if (e < 1) return;
 	inputpath.value = t.slice(0, e)
 	listFiles()
 }
