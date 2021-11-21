@@ -68,13 +68,15 @@ class api extends EventEmitter {
 	}
 	
 	disconnect (req, res, ip) {
-		if (!Object.keys(this.clients).includes(ip)) {
-			res.writeHead(404,{'Content-Type':'text/plain'});
-			res.end('no ip found')
-			return;
+		if (useLogin) {
+			if (!Object.keys(this.clients).includes(ip)) {
+				res.writeHead(404,{'Content-Type':'text/plain'});
+				res.end('no ip found')
+				return;
+			}
+			console.info(`login::::::::${ip} has logged out of ${this.clients[ip]}`)
+			delete this.clients[ip];
 		}
-		console.info(`login::::::::${ip} has logged out of ${this.clients[ip]}`)
-		delete this.clients[ip];
 		res.writeHead(200,{'Content-Type':'text/plain'});
 		res.end('success')
 	}
