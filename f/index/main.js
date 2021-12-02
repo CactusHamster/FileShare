@@ -60,7 +60,9 @@ function connect () {
 					clearInterval(inter)
 					clearInterval(cmdinter); cmdinter = null;
 				}
-				//console.info('PING')
+				else if (data.includes('noSignOn')) {
+					clearInterval(inter)
+				}
 			})
 		}, 5*60*1000)
 	})
@@ -158,7 +160,7 @@ function backPath() {
 		return;
 	}
 	var e = Math.max(t.lastIndexOf('/'), t.lastIndexOf('\\'))
-	if (e < 2) return;
+	if (e < 1) return;
 	inputpath.value = t.slice(0, e)
 	listFiles()
 }
@@ -192,6 +194,7 @@ function refreshcmd () {
 			return;
 		}
 		try {
+			if (cmddata == '') {cmddata = "[]"}
 			jcmd = JSON.parse(cmddata)
 		}
 		catch (e) {
@@ -326,6 +329,9 @@ const upload = (file, path) => {
       //"Content-Type": "You will perhaps need to define a content-type here"
     },
     body: file // This is your file object
+  })
+  .then(response => {
+	  listFiles()
   })/*.then(
     response => console.info(response) //response.json() // if the response is a JSON object
   ).then(
@@ -341,11 +347,10 @@ function createFileButtonHandler () {
 	let checked = document.getElementById('FileCreateSwitch').checked
 	let type = checked ? 'file' : 'dir'
 	let name = document.getElementById('newFileNameBox').value
-	if (+name == 0) return;
+	if (name == '') return;
 	httpGetAsync(location.origin+'/api/create/'+type+'?path='+PATH+'/'+name, function (ret) {
-		console.info(ret)
+		listFiles()
 	})
-	
 }
 
 
@@ -362,14 +367,13 @@ document.getElementsByName('fileUploadInput')[0].addEventListener('change', func
 	
 })
 
-
+/*
 document.getElementById('deleteButton').addEventListener('click', function () {
 	
 	
 	
 })
-
-
+*/
 
 resetPath()
 //listFiles()

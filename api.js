@@ -4,6 +4,7 @@ const { statSync, createReadStream } = require('fs')
 const { EventEmitter } = require('events');
 const { readdir, appendFile, mkdir } = require('fs/promises')
 let testmode = (process.argv.includes('-t') || process.argv.includes('--test'))
+let useLogin = (process.argv.includes('-c') || process.argv.includes('--connect'))
 let deletemode = (process.argv.includes('-d') || process.argv.includes('--delete'))
 if (testmode) console.info('Running with testmode!'.brightGreen)
 
@@ -25,7 +26,7 @@ class api extends EventEmitter {
 	}
 	
 	checkIp (ip, res) {
-		if (!Object.keys(this.clients).includes(ip)) {
+		if (!Object.keys(this.clients).includes(ip) && useLogin) {
 			if (testmode) {
 				this.connect({}, {writeHead: function () {}, end: () => {}}, ip, {name: 'test user'})
 				return true
@@ -67,13 +68,15 @@ class api extends EventEmitter {
 	}
 	
 	disconnect (req, res, ip) {
-		if (!Object.keys(this.clients).includes(ip)) {
-			res.writeHead(404,{'Content-Type':'text/plain'});
-			res.end('no ip found')
-			return;
+		if (useLogin) {
+			if (!Object.keys(this.clients).includes(ip)) {
+				res.writeHead(404,{'Content-Type':'text/plain'});
+				res.end('no ip found')
+				return;
+			}
+			console.info(`login::::::::${ip} has logged out of ${this.clients[ip]}`)
+			delete this.clients[ip];
 		}
-		console.info(`login::::::::${ip} has logged out of ${this.clients[ip]}`)
-		delete this.clients[ip];
 		res.writeHead(200,{'Content-Type':'text/plain'});
 		res.end('success')
 	}
@@ -137,6 +140,7 @@ class api extends EventEmitter {
 	}	
 	
 	apiHandle(req, res, url, ip) {
+		this.clients[ip] = this.clients[ip] ?? {}
 		if (url.pathname.startsWith("/api/connect")) {
 			this.connect(req, res, ip, url.query)
 		}
@@ -206,6 +210,12 @@ class api extends EventEmitter {
 api = new api()
 
 api.on('ping', function (req, res, ip, end=false) {
+	if (!useLogin) {
+		res.writeHead(200, {'Content-Type':'text/plain'});
+		res.end('noSignOn')
+		return;
+	}
+	this.clients[ip] = this.clients[ip] ?? {}
 	let ping = this.clients[ip].ping
 	this.clients[ip].pinged = true
 	if (ping != null) clearTimeout(this.clients[ip].ping)
@@ -243,6 +253,7 @@ api.on('cmd', function (req, res, url, ip) {
 		res.end('no cmd command provided')
 		return;
 	}
+	api.clients[ip] = api.clients[ip] ?? {}
 	if (api.clients[ip].cmdRunning) {
 		cmd = String(cmd)
 		/*res.writeHead(400,{'Content-Type':'text/plain'}); res.end('cmd already running')*/
@@ -265,6 +276,7 @@ api.on('cmd', function (req, res, url, ip) {
 		res.end(JSON.stringify(e))
 		return;
 	}
+	if (!api.clients[ip].cmdData) api.clients[ip].cmdData = []
 	api.clients[ip].cmd.stdout.on('data', function (data) {
 		api.clients[ip].cmdData.push('DATA:::'+data.toString())
 	})
