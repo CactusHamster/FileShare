@@ -5,6 +5,7 @@ const { readFile, readFileSync } = require('fs');
 let favicon = readFileSync('./favicon.ico');
 let api = require('./api.js')
 let testmode = (process.argv.includes('-t') || process.argv.includes('--test'))
+let log = (process.argv.includes('-l') || process.argv.includes('--log'))
 require('colors')
 
 function sendfile (req, res, file) {
@@ -28,7 +29,7 @@ function sendfile (req, res, file) {
 http.createServer((req/*, {maxHeaderSize: 6000000000}*/, res)=>{
 	let ip = req.socket.remoteAddress;
 	let url = URL.parse(req.url,true);
-	if (testmode) console.info(req.url.toString().blue)
+	if (log) req.url.toString().includes('/api/cmddata') ? '' : console.info(req.url.toString().blue)
 	if (url.pathname === "/") {
 		sendfile(req, res, './main.html');
 		return;
