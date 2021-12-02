@@ -8,7 +8,6 @@
   "name": "fileshare",
   "version": "1.0.0",
   "main": "api.js",
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CactusHamster/FileShare.git"
